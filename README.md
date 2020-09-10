@@ -36,8 +36,8 @@ The sequence databases used in the DeepMSA homologous sequences search include U
 ## Predict from given PLM and PSSM data (predict.py):
   * `-h, --help`            show this help message and exit
   * `-m, --model_type`      Type of model, can be one of sequence_attention, regional_attention or combined
-  * `-l, --plm_data`        Path to PLM data. Should be a numpy array flattend from (441,L,L), and saved as .npy format(https://numpy.org/doc/stable/reference/generated/numpy.save.html)
-  * `-s, --pssm_data`       Path to PSSM data. Should be a text file start with " # PSSM" as the first line, and the following contents should be 20 lines each contains L values, where L is the length of the input sequence.
+  * `-l, --plm_data`        Path to PLM data. Should be a numpy array flattend from (441,L,L), where L is the length of the input sequence. It should be saved as .npy format(https://numpy.org/doc/stable/reference/generated/numpy.save.html).
+  * `-s, --pssm_data`       Path to PSSM data. Should be a text file start with " # PSSM" as the first line, and the following contents should be 20 lines each contains L values.
   * `-o, --out_file`        Path to output contact map. An L by L numeric matrix saved as TSV format.
 
 
