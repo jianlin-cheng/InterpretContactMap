@@ -1,0 +1,16 @@
+,0
+0,3
+1,"[441, 40]"
+2,True
+3,sigmoid
+4,64
+5,34
+6,nadam
+7,he_normal
+8,binary_crossentropy
+9,19.0
+10,1.0
+11,3
+12,1
+13,16
+14,none

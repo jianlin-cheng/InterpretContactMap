@@ -16,6 +16,9 @@ Checkout the [Lab Page](http://calla.rnet.missouri.edu/cheng/).
 
 [Python 3.6.0](https://www.python.org/)
 
+CUDA-9.0.176
+CUDNN-7.1.4
+
 ## Required Python modules:
 
 ```
@@ -30,6 +33,22 @@ Two types of features are required: PSSM sequence profile which can be generated
 The sequence databases used in the DeepMSA homologous sequences search include Uniclust30 (2017-10), Uniref90 (2018-04) and Metaclust50 (2018-01), our in-house customized database which combines Uniref100 (2018-04) and metagenomics sequence databases (2018-04), and NR90 database (2016). Sample features can be found under the  example folder, and users can build both features from their own customized sequence databases.
 
 
+## Predict from given PLM and PSSM data (predict.py):
+  * `-h, --help`            show this help message and exit
+  * `-m, --model_type`      Type of model, can be one of sequence_attention, regional_attention or combined
+  * `-l, --plm_data`        Path to PLM data. Should be a numpy array flattend from (441,L,L), and saved as .npy format(https://numpy.org/doc/stable/reference/generated/numpy.save.html)
+  * `-s, --pssm_data`       Path to PSSM data. Should be a text file start with " # PSSM" as the first line, and the following contents should be 20 lines each contains L values, where L is the length of the input sequence.
+  * `-o, --out_file`        Path to output contact map. An L by L numeric matrix saved as TSV format.
+
+
+Example:
+
+```
+python predict.py -m combined -l example/plm/T0970.plm -s example/other/X-T0970.txt -o outmap.tsv
+```
+                        
+                        
+
 ## Training (train.py)
 Train models for protein contact prediction:
 
@@ -40,11 +59,6 @@ python train.py [feature_location] [output_dir] [epoch_number] [batch_size] [mod
 model_type can be one of "baselineModel", "regional_attention" or "sequence_attention"
 
 
-## Predict (predict.py)
-
-```
-python predict.py [model_path] [model_type] [epoch_number] [new_data_path] [out_dir]
-```
 
 
 
