@@ -999,12 +999,12 @@ def DNCON4_1d2dconv_train_win_filter_layer_opt_fast_2D_generator(feature_num,CV_
         DNCON4 = channel_attention(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
                                    nb_layers,opt,initializer,loss_function,weight_p,weight_n, \
                                    att_config,kmax,att_outdim,insert_pos)
-    elif model_prefix == 'regional_attention':
+    elif model_prefix == 'regional_attention_ori':
         opt = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0000)#0.001  decay=0.0
         DNCON4 = regional_attention(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
                                    nb_layers,opt,initializer,loss_function,weight_p,weight_n, \
                                    att_config,att_outdim,insert_pos)   #att_config is region_size  
-    elif model_prefix == 'regional_attention3D':
+    elif model_prefix == 'regional_attention':
         opt = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0000)#0.001  decay=0.0
         DNCON4 = regional_attention3D(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
                                    nb_layers,opt,initializer,loss_function,weight_p,weight_n, \
@@ -1014,54 +1014,10 @@ def DNCON4_1d2dconv_train_win_filter_layer_opt_fast_2D_generator(feature_num,CV_
         DNCON4 = sequence_attention(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
                                    nb_layers,opt,initializer,loss_function,weight_p,weight_n,att_config, \
                                    kmax,att_outdim,insert_pos)   
-#    elif model_prefix == 'ContactTransformer':
-#        DNCON4 = ContactTransformer(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
-#                                   nb_layers,opt,initializer,loss_function,weight_p,weight_n,att_config, \
-#                                   kmax,att_outdim,insert_pos)
-#    elif model_prefix == 'ContactTransformerLite':
-#        DNCON4 = ContactTransformerLite(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
-#                                   nb_layers,opt,initializer,loss_function,weight_p,weight_n,att_config, \
-#                                   kmax,att_outdim,insert_pos)
-#    elif model_prefix == 'ContactTransformerV3':
-#        DNCON4 = ContactTransformerV3(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
-#                               nb_layers,opt,initializer,loss_function,weight_p,weight_n,att_config, \
-#                               kmax,att_outdim,insert_pos)
-    elif model_prefix == 'ContactTransformerV5':
-        DNCON4 = ContactTransformerV5(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
-                               nb_layers,opt,initializer,loss_function,weight_p,weight_n,att_config, \
-                               kmax,att_outdim,insert_pos)
-    elif model_prefix == 'ContactTransformerV6':
-        DNCON4 = ContactTransformerV6(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
-                               nb_layers,opt,initializer,loss_function,weight_p,weight_n,att_config, \
-                               kmax,att_outdim,insert_pos)
-    elif model_prefix == 'ContactTransformerV7':
-        DNCON4 = ContactTransformerV7(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
-                               nb_layers,opt,initializer,loss_function,weight_p,weight_n,att_config, \
-                               kmax,att_outdim,insert_pos)
     elif model_prefix == 'baselineModel':
         DNCON4 = baselineModel(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
                                nb_layers,opt,initializer,loss_function,weight_p,weight_n,att_config, \
                                kmax,att_outdim,insert_pos)
-    elif model_prefix == 'ContactTransformerV8':
-        DNCON4 = ContactTransformerV8(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
-                               nb_layers,opt,initializer,loss_function,weight_p,weight_n,att_config, \
-                               kmax,att_outdim,insert_pos)
-    elif model_prefix == 'ContactTransformerV9':
-        DNCON4 = ContactTransformerV9(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
-                               nb_layers,opt,initializer,loss_function,weight_p,weight_n,att_config, \
-                               kmax,att_outdim,insert_pos)
-    elif model_prefix == 'baselineModelSym':
-        DNCON4 = baselineModelSym(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
-                               nb_layers,opt,initializer,loss_function,weight_p,weight_n,att_config, \
-                               kmax,att_outdim,insert_pos)
-    elif model_prefix == 'ContactTransformerV10':
-        DNCON4 = ContactTransformerV10(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
-                               nb_layers,opt,initializer,loss_function,weight_p,weight_n,att_config, \
-                               kmax,att_outdim,insert_pos)   
-    elif model_prefix == 'ContactTransformerV11':
-        DNCON4 = ContactTransformerV11(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
-                               nb_layers,opt,initializer,loss_function,weight_p,weight_n,att_config, \
-                               kmax,att_outdim,insert_pos)   
     else:
         print('Undefined model.')
         sys.exit()
