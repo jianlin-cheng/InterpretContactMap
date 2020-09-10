@@ -11,7 +11,9 @@ Checkout the [Lab Page](http://calla.rnet.missouri.edu/cheng/).
 ## Required software:
 
 [PSI-BLAST 2.2.26](https://www.ncbi.nlm.nih.gov/books/NBK131777/) (For generating PSSM sequence profile)
+
 [CCMpred](https://github.com/soedinglab/CCMpred) (For generating pseudo-likelihood maximization)
+
 [Python 3.6.0](https://www.python.org/)
 
 ## Required Python modules:
