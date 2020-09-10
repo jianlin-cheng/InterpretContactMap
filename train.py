@@ -8,9 +8,6 @@ from DNCON_lib import *
 from training_strategy import *
 
 
-if (len(sys.argv) != 15) and (len(sys.argv) != 19):
-  print('please input the right parameters')
-  sys.exit(1)
 current_os_name = platform.platform()
 print('%s' % current_os_name)
 
