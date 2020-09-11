@@ -4,13 +4,149 @@ from keras import backend as K
 from keras.models import Model
 from keras.initializers import random_normal, Constant
 from keras.regularizers import l2
-from keras.layers import Lambda, Input, Layer, Dropout, Activation, Add
+from keras.layers import Lambda, Input, Layer, Dropout, Activation, Add, add
 from keras.layers import Dense, TimeDistributed, Conv1D, Conv2D, Conv3D
 from keras.layers import Concatenate, BatchNormalization, ZeroPadding1D
 from keras.layers import MaxPooling1D, Softmax, Multiply, Embedding, Permute
 from keras.layers import GlobalAveragePooling2D, Reshape, CuDNNGRU, Bidirectional
 
-from Model_construct import _residual_block_K, _bn_relu_conv_K, basic_block_K, _handle_dim_ordering
+def _handle_dim_ordering():
+    global ROW_AXIS
+    global COL_AXIS
+    global CHANNEL_AXIS
+    if K.image_dim_ordering() == 'tf':
+        ROW_AXIS = 1
+        COL_AXIS = 2
+        CHANNEL_AXIS = 3
+    else:
+        CHANNEL_AXIS = 1
+        ROW_AXIS = 2
+        COL_AXIS = 3
+
+def _block_name_base_K(stage, block):
+    """Get the convolution name base and batch normalization name base defined by
+    stage and block.
+    If there are less than 26 blocks they will be labeled 'a', 'b', 'c' to match the
+    paper and keras and beyond 26 blocks they will simply be numbered.
+    """
+    if block < 27:
+        block = '%c' % (block + 97)  # 97 is the ascii number for lowercase 'a'
+    conv_name_base = 'res' + str(stage) + str(block) + '_branch'
+    bn_name_base = 'bn' + str(stage) + str(block) + '_branch'
+    return conv_name_base, bn_name_base
+
+def _bn_relu_K(x, bn_name=None, relu_name=None):
+    """Helper to build a BN -> relu block
+    """
+    # norm = BatchNormalization(axis=CHANNEL_AXIS, name=bn_name)(x)
+    norm = InstanceNormalization(axis=-1, name=bn_name)(x)
+    return Activation("relu", name=relu_name)(norm)
+
+def _bn_relu_conv_K(**conv_params):
+    filters = conv_params["filters"]
+    kernel_size = conv_params["kernel_size"]
+    strides = conv_params.setdefault("strides", (1, 1))
+    dilation_rate = conv_params.setdefault("dilation_rate", (1, 1))
+    conv_name = conv_params.setdefault("conv_name", None)
+    bn_name = conv_params.setdefault("bn_name", None)
+    relu_name = conv_params.setdefault("relu_name", None)
+    kernel_initializer = conv_params.setdefault("kernel_initializer", "he_normal")
+    padding = conv_params.setdefault("padding", "same")
+
+    def f(x):
+        activation = _bn_relu_K(x, bn_name=bn_name, relu_name=relu_name)
+        return Conv2D(filters=filters, kernel_size=kernel_size,
+                      strides=strides, padding=padding,
+                      dilation_rate=dilation_rate,
+                      kernel_initializer=kernel_initializer,
+                      name=conv_name)(activation)
+                      # kernel_regularizer=kernel_regularizer,
+
+    return f
+
+def _residual_block_K(block_function, filters, blocks, stage, transition_strides=None,
+                      transition_dilation_rates=None, dilation_rates=None, 
+    is_first_layer=False, dropout=None, residual_unit=_bn_relu_conv_K, use_SE = False):
+    if transition_dilation_rates is None:
+        transition_dilation_rates = [(1, 1)] * blocks
+    if transition_strides is None:
+        transition_strides = [(1, 1)] * blocks
+    if dilation_rates is None:
+        dilation_rates = [1] * blocks
+
+    def f(x):
+        for i in range(blocks):
+            is_first_block = is_first_layer and i == 0
+            x = block_function(filters=filters, stage=stage, block=i,
+                               transition_strides=transition_strides[i],
+                               dilation_rate=dilation_rates[i],
+                               is_first_block_of_first_layer=is_first_block,
+                               dropout=dropout,
+                               residual_unit=residual_unit, use_SE = use_SE)(x)
+        return x
+
+    return f
+
+def _shortcut_K(input_feature, residual, conv_name_base=None, bn_name_base=None):
+    input_shape = K.int_shape(input_feature)
+    residual_shape = K.int_shape(residual)
+    equal_channels = input_shape[CHANNEL_AXIS] == residual_shape[CHANNEL_AXIS]
+
+    shortcut = input_feature
+    # 1 X 1 conv if shape is different. Else identity.
+    if not equal_channels:
+        print('reshaping via a convolution...')
+        if conv_name_base is not None:
+            conv_name_base = conv_name_base + '1'
+        shortcut = Conv2D(filters=residual_shape[CHANNEL_AXIS],
+                          kernel_size=(1, 1),
+                          strides=(1, 1),
+                          padding="valid",
+                          kernel_initializer="he_normal",
+                          name=conv_name_base)(input_feature) 
+                          # kernel_regularizer=regularizers.l2(0.0001),
+        if bn_name_base is not None:
+            bn_name_base = bn_name_base + '1'
+        # shortcut = BatchNormalization(axis=CHANNEL_AXIS, name=bn_name_base)(shortcut)
+        # shortcut = InstanceNormalization(axis=CHANNEL_AXIS, name=bn_name_base)(shortcut)
+
+    return add([shortcut, residual])
+
+def basic_block_K(filters, stage, block, transition_strides=(1, 1), dilation_rate=(1, 1),
+                  is_first_block_of_first_layer=False, dropout=None, residual_unit=_bn_relu_conv_K, use_SE = False):
+    def f(input_features):
+        conv_name_base, bn_name_base = _block_name_base_K(stage, block)
+        if is_first_block_of_first_layer:
+            # don't repeat bn->relu since we just did bn->relu->maxpool
+            x = Conv2D(filters=filters, kernel_size=(3, 3),
+                       strides=(1, 1),
+                       dilation_rate=dilation_rate,
+                       padding="same",
+                       kernel_initializer="he_normal",
+                       name=conv_name_base + '2a')(input_features)
+                       # kernel_regularizer=regularizers.l2(1e-4),
+        else:
+            x = residual_unit(filters=filters, kernel_size=(3, 3),
+                              strides=(1, 1),
+                              dilation_rate=dilation_rate,
+                              conv_name_base=conv_name_base + '2a',
+                              bn_name_base=bn_name_base + '2a')(input_features)
+
+        if dropout is not None:
+            x = Dropout(dropout)(x)
+
+        x = residual_unit(filters=filters, kernel_size=(3, 3),
+                          conv_name_base=conv_name_base + '2b',
+                          bn_name_base=bn_name_base + '2b')(x)
+
+        if use_SE == True:
+            x = squeeze_excite_block(x)
+        return _shortcut_K(input_features, x)
+
+    return f
+
+
+
 
 class MaxoutActLayer(Layer):
     def __init__(self, filters=4, kernel_size=(1,1), output_dim=64, 
@@ -1409,25 +1545,3 @@ def ContactTransformerV11(kernel_size=3,feature_2D_num=(441,56),use_bias=True,hi
 
     return model
 
-
-if  __name__ == '__main__':
-    x2d = np.random.random((20,10,10,441))
-    x1d = np.random.random((20,10,10,56))
-    y = np.random.random((20,10,10,1))
-    y_sym = np.zeros((20,1))
-    
-#    m1 = ContactTransformerV9(region_size=5)
-#    m1.summary()
-#    history = m1.fit([x2d,x1d],[y,y_sym],epochs = 15)
-#    y = m1.predict([x2d,x1d])
-
-#    m2 = ContactTransformerLite(config_1d=1)
-#    m2.summary()
-#    history = m2.fit([x2d,x1d],y,epochs = 15)
-    
-#    m2 = ContactTransformerV4(feature_2D_num=(441,56),att_outdim=16,att_config=1,insert_pos='last_conv')
-#    m2.summary()
-##    aaa=m2.to_json()
-##    bbb=m2.to_json()
-#    history = m2.fit([x2d,x1d],y,epochs = 15)    
-#    y = m2.predict([x2d,x1d])
