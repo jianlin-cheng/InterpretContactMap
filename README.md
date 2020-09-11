@@ -17,7 +17,8 @@ Checkout the [Lab Page](http://calla.rnet.missouri.edu/cheng/).
 [Python 3.6.0](https://www.python.org/)
 
 CUDA-9.0.176
-CUDNN-7.1.4
+
+cuDNN-7.1.4
 
 ## Required Python modules:
 
