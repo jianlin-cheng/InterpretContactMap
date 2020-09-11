@@ -5,7 +5,7 @@ import pandas as pd
 import tensorflow as tf
 
 from keras.utils import CustomObjectScope, Sequence
-from contact_transformer import InstanceNormalization,ContactTransformerV5, ContactTransformerV7
+from model_utils import InstanceNormalization,ContactTransformerV5, ContactTransformerV7
 from keras.optimizers import Adam
 
 
