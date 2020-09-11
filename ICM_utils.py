@@ -28,10 +28,10 @@ def load_model_from_config(model_config,model_func):
     insert_pos = model_parameters.iloc[14][0]
     
     opt = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0000)#0.001  decay=0.0
-    DNCON4 = model_func(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
+    model = model_func(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
                                nb_layers,opt,initializer,loss_function,weight_p,weight_n,att_config, \
                                kmax,att_outdim,insert_pos)
-    return DNCON4
+    return model
 
 
 def load_plm(plm_data):
