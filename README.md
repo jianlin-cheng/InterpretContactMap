@@ -34,7 +34,9 @@ Two types of features are required: PSSM sequence profile which can be generated
 The sequence databases used in the DeepMSA homologous sequences search include Uniclust30 (2017-10), Uniref90 (2018-04) and Metaclust50 (2018-01), our in-house customized database which combines Uniref100 (2018-04) and metagenomics sequence databases (2018-04), and NR90 database (2016). Sample features can be found under the  example folder, and users can build both features from their own customized sequence databases.
 
 
-## Predict from given PLM and PSSM data (predict.py):
+## Prediction
+
+Predict from given PLM and PSSM data (predict.py):
   * `-h, --help`            show this help message and exit
   * `-m, --model_type`      Type of model, can be one of sequence_attention, regional_attention or combined
   * `-l, --plm_data`        Path to PLM data. Should be a numpy array flatten from (441,L,L), where L is the length of the input sequence. It should be saved as .npy format (https://numpy.org/doc/stable/reference/generated/numpy.save.html).
@@ -50,7 +52,9 @@ python predict.py -m sequence_attention -l example/plm/T0970.plm -s example/othe
                         
                         
 
-## Train models for protein contact prediction with given PLM, PSSM and labels for training and validation datasets (train.py):
+## Training
+
+Train models for protein contact prediction with given PLM, PSSM and labels for training and validation datasets (train.py):
   * `-h, --help`                 show this help message and exit.
   * `-plm, --plm_data_path`      Path to PLM data files.
   * `-pssm, --pssm_data_path`    Path to PSSM data files.
