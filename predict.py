@@ -1,7 +1,7 @@
 import argparse
 import numpy as np
 
-from ICM_utils import load_plm, load_pssm, predict_cmap
+from ICM_utils import load_plm, load_features, predict_cmap
 
 def make_argument_parser():
 
@@ -28,7 +28,7 @@ def main():
     inputs_plm = load_plm(plm_data)
     
     # load pssm
-    inputs_pssm = load_pssm(pssm_data)
+    inputs_pssm = load_features(pssm_data)
     
     input_data = [inputs_plm,inputs_pssm]
     
@@ -43,6 +43,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-

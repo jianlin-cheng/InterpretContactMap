@@ -4,7 +4,7 @@ from keras import backend as K
 from keras.models import Model
 from keras.initializers import random_normal, Constant
 from keras.regularizers import l2
-from keras.layers import Lambda, Input, Layer, Dropout, Activation, Add, add, Subtract
+from keras.layers import Lambda, Input, Layer, Dropout, Activation, Add, add
 
 from keras.layers import Dense, TimeDistributed, Conv1D, Conv2D, Conv3D
 from keras.layers import Concatenate, BatchNormalization, ZeroPadding1D
@@ -823,8 +823,6 @@ def PosEncodingLayer2d(x,d_emb = 64,max_len =1000):
     return encode2d
 
 add_layer = Lambda(lambda x:x[0]+x[1], output_shape=lambda x:x[0]) 
-
-
 
 def Decoder2D(DNCON4_2D_tensor,DNCON4_1D_tensor,filters,pe,config_merge,
               region_size=3,layers = 3,n_head = 4):

@@ -9,7 +9,6 @@ from model_utils import InstanceNormalization,ContactTransformerV5, ContactTrans
 from keras.optimizers import Adam
 
 
-
 def load_model_from_config(model_config,model_func):
     model_parameters = pd.read_csv(model_config,header =0, index_col =0)
     win_array = int(model_parameters.iloc[0][0])
@@ -41,18 +40,19 @@ def load_plm(plm_data):
     inputs_plm = np.moveaxis(inputs_plm,1,-1)
     return inputs_plm
 
-def load_pssm(pssm_data):
-    f = open(pssm_data, "r")
+# Load 1D features and tile them to 2D: (L,n)->(L,L,2n)
+def load_features1D(feature_data,name):
+    f = open(feature_data, "r")
     all_other_data = f.readlines()
     f.close() 
-    pssm_idx = all_other_data.index('# PSSM\n')
-    plm_rawdata = [line.strip().split() for line in all_other_data[(pssm_idx+1):(pssm_idx+21)]]
+    feature_idx = all_other_data.index('# '+name+'\n')
+    plm_rawdata = [line.strip().split() for line in all_other_data[(feature_idx+1):(feature_idx+21)]]
     L = len(plm_rawdata[0])
-    inputs_pssm = np.zeros((1,L,L,40))
+    inputs_feature = np.zeros((1,L,L,40))
     for i in range(20):
         for j in range(L):
-            inputs_pssm[:,:,j,2*i] = inputs_pssm[:,j,:,2*i+1] = [float(x) for x in plm_rawdata[i]]
-    return inputs_pssm
+            inputs_feature[:,:,j,2*i] = inputs_feature[:,j,:,2*i+1] = [float(x) for x in plm_rawdata[i]]
+    return inputs_feature
 
 def init_model(model_type):
     if model_type == 'sequence_attention':
@@ -103,12 +103,11 @@ class data_generator(Sequence):
     def on_epoch_end(self):
       self.indexes = np.arange(len(self.sample_list))
       np.random.shuffle(self.indexes)
-          
         
     def __data_generation(self,index):
         current_sample = self.sample_list[self.indexes[index]]
         inputs_plm = load_plm(self.plm_data_path+current_sample+'.plm')
-        inputs_pssm = load_pssm(self.pssm_data_path+'X-'+current_sample+'.txt')
+        inputs_pssm = load_features(self.pssm_data_path+'X-'+current_sample+'.txt','PSSM')
         X = [inputs_plm,inputs_pssm]
         L = inputs_plm.shape[1]
         Y = np.loadtxt(glob.glob(self.label_path+'*'+current_sample+'*.txt')[0]).reshape((1,L,L,1))
