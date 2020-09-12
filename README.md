@@ -14,7 +14,7 @@ Checkout the [Lab Page](http://calla.rnet.missouri.edu/cheng/).
 
 [CCMpred](https://github.com/soedinglab/CCMpred) (For generating pseudo-likelihood maximization)
 
-[Python 3.6.0](https://www.python.org/)
+[Python 3.6.5](https://www.python.org/)
 
 CUDA-9.0.176
 
@@ -23,9 +23,11 @@ cuDNN-7.1.4
 ## Required Python modules:
 
 ```
-numpy 1.15.2
-Keras 2.1.6
+numpy 1.19.2
+pandas 1.1.2
 tensorflow-gpu 1.9.0
+keras 2.1.6
+h5py 2.8.0
 ```
 
 ## Feature geraration
