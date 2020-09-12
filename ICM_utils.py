@@ -107,7 +107,7 @@ class data_generator(Sequence):
     def __data_generation(self,index):
         current_sample = self.sample_list[self.indexes[index]]
         inputs_plm = load_plm(self.plm_data_path+current_sample+'.plm')
-        inputs_pssm = load_features(self.pssm_data_path+'X-'+current_sample+'.txt','PSSM')
+        inputs_pssm = load_features1D(self.pssm_data_path+'X-'+current_sample+'.txt','PSSM')
         X = [inputs_plm,inputs_pssm]
         L = inputs_plm.shape[1]
         Y = np.loadtxt(glob.glob(self.label_path+'*'+current_sample+'*.txt')[0]).reshape((1,L,L,1))
