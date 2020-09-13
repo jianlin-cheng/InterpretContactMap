@@ -68,12 +68,18 @@ def init_model(model_type):
         model = load_model_from_config(model_dir+'model_config.txt',model_func)
     return model,model_dir
 
-def predict_cmap(model,input_data,weights=False):
+def predict_cmap(input_data,model_type,weights=False):
+    model,model_dir = init_model(model_type)
+    model.load_weights(model_dir+'model_weights.h5')
     pred_out = model.predict(input_data, batch_size= 1)
     L = pred_out.shape[1]
     CMAP = pred_out.reshape((L, L))
     CMAP_final = (CMAP+CMAP.T)/2
-    return CMAP_final
+    score = None
+    if weights:
+        score = extract_attention_score(model,input_data, model_type)
+    return CMAP_final, score
+
 
 def load_sample_config(sample_list_file):
     f = open(sample_list_file, "r")
