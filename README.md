@@ -39,11 +39,11 @@ The sequence databases used in the DeepMSA homologous sequences search include U
 
 Predict from given PLM and PSSM data (predict.py):
   * `-h, --help`            show this help message and exit
-  * `-m, --model_type`      Type of model, can be one of sequence, regional or combined
+  * `-m, --model_type`      Type of model, can be one of "sequence", "regional" or "combined"
   * `-l, --plm_data`        Path to PLM data. Should be a numpy array flatten from (441,L,L), where L is the length of the input sequence. It should be saved as .npy format (https://numpy.org/doc/stable/reference/generated/numpy.save.html).
   * `-s, --pssm_data`       Path to PSSM data. Should be a text file start with " # PSSM" as the first line, and the following contents should be 20 lines each contains L values.
   * `-o, --out_file`        Path to output contact map. An L by L numeric matrix saved as TSV format.
-  * `-w, --weights`         Should attention weights be extracted. Sequence attention weights would have shape (heads,L,L). Regional attention weights would have shape (heads,n<sup>2</sup>,L,L), where n is the side length of the scope of attention mechanism. Detailed description of how attention weights are computed can be found at https://www.biorxiv.org/content/10.1101/2020.09.04.283937v1. 
+  * `-w, --weights`         Should attention weights be extracted. Sequence attention weights would have shape (heads,L,L). Regional attention weights would have shape (heads,n<sup>2</sup>,L,L), where n is the side length of the scope of attention mechanism.Both weights are saved as .npy format. Detailed description of how attention weights are computed can be found at https://www.biorxiv.org/content/10.1101/2020.09.04.283937v1. 
 
 Example:
 

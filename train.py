@@ -15,7 +15,7 @@ def make_argument_parser():
     parser.add_argument('--sample_list_file', '-s', type=str, 
                         required=True,help='Config file indicating the sample names for training and validation')
     parser.add_argument('--model_type', '-m', type=str, required=True,
-                        help='Type of model, can be one of sequence, regional')
+                        help='Type of model, can be \"sequence\" or \"regional\"')
     parser.add_argument('--output_dir', '-o', type=str, required=True,
                         help='Path where the trained models and history are saved')
 

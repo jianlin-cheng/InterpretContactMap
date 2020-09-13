@@ -9,7 +9,7 @@ def make_argument_parser():
     parser = argparse.ArgumentParser(description="Predict a model.",formatter_class=argparse.RawTextHelpFormatter)
     
     parser.add_argument('--model_type', '-m', type=str, required=True,
-                        help='Type of model, can be one of sequence, regional or combined')
+                        help='Type of model, can be one of \"sequence\", \"regional\" or \"combined\"')
     parser.add_argument('--plm_data', '-l', type=str, required=True,
                         help='Path to PLM data. Should be a numpy array flatten from (441,L,L), and saved as .npy format(https://numpy.org/doc/stable/reference/generated/numpy.save.html)')
     parser.add_argument('--pssm_data', '-s', type=str, required=True,
