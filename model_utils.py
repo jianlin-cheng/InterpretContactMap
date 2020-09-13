@@ -780,6 +780,4 @@ def extract_regional_weights(X,model):
     att_viz = Model(input_layer,att_out1)
     
     attention_score_mat = att_viz.predict(X)
-    # attention_score_mat = attention_score_mat[0,:,:,:,:]
-    # attention_score_mat = np.moveaxis(attention_score_mat, -1, 0)
-    return attention_score_mat
+    return attention_score_mat[0,:,:,:,:]
