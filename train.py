@@ -1,7 +1,7 @@
+import os
 import argparse
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger
 from ICM_utils import data_generator, load_sample_config, init_model
-from os.path import normpath
 
 def make_argument_parser():
     parser = argparse.ArgumentParser(description="Train a model.",formatter_class=argparse.RawTextHelpFormatter)
@@ -38,9 +38,12 @@ def main():
     patience = args.patience
     epochs = args.epochs
 
-    output_model_best = normpath(output_dir + '/best_model.h5')
-    output_model = normpath(output_dir + '/epoch{epoch:02d}.val_acc{val_acc:03f}.h5')
-    output_history = normpath(output_dir + '/histroy.csv')
+    output_dir = os.path.normpath(output_dir)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    output_model_best = output_dir + '/best_model.h5'
+    output_model = output_dir + '/epoch{epoch:02d}.val_acc{val_acc:03f}.h5'
+    output_history = output_dir + '/histroy.csv'
 
     sample_list_train, sample_list_val = load_sample_config(sample_list_file)
     datagen_train = data_generator(plm_data_path,pssm_data_path,label_path,sample_list_train)
@@ -57,10 +60,11 @@ def main():
 
     if model_type in ['sequence','regional']:
         model,_ = init_model(model_type)
+        model.fit_generator(datagen_train,epochs=epochs,validation_data=datagen_val,verbose=1,
+                    callbacks=[checkpointer1,checkpointer2, earlystopper, csv_logger])
     else:
         raise ValueError('Model type should be \"sequence\" or \"regional\"')
-    model.fit_generator(datagen_train,epochs=epochs,validation_data=datagen_val,verbose=1,
-                        callbacks=[checkpointer1,checkpointer2, earlystopper, csv_logger])
+
     
 if __name__ == '__main__':
     main()
