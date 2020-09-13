@@ -1,6 +1,7 @@
 import argparse
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger
 from ICM_utils import data_generator, load_sample_config, init_model
+from os.path import normpath
 
 def make_argument_parser():
     parser = argparse.ArgumentParser(description="Train a model.",formatter_class=argparse.RawTextHelpFormatter)
@@ -14,7 +15,7 @@ def make_argument_parser():
     parser.add_argument('--sample_list_file', '-s', type=str, 
                         required=True,help='Config file indicating the sample names for training and validation')
     parser.add_argument('--model_type', '-m', type=str, required=True,
-                        help='Type of model, can be one of sequence_attention, regional_attention')
+                        help='Type of model, can be one of sequence, regional')
     parser.add_argument('--output_dir', '-o', type=str, required=True,
                         help='Path where the trained models and history are saved')
 
@@ -38,9 +39,9 @@ def main():
     patience = args.patience
     epochs = args.epochs
 
-    output_model_best = output_dir + '/best_model.h5'
-    output_model = output_dir + '{epoch:02d}.{val_acc:03f}.h5'
-    output_history = output_dir + 'histroy.csv'
+    output_model_best = normpath(output_dir + '/best_model.h5')
+    output_model = normpath(output_dir + '/epoch{epoch:02d}.val_acc{val_acc:03f}.h5')
+    output_history = normpath(output_dir + '/histroy.csv')
 
     sample_list_train, sample_list_val = load_sample_config(sample_list_file)
     datagen_train = data_generator(plm_data_path,pssm_data_path,label_path,sample_list_train)
@@ -58,8 +59,3 @@ def main():
 if __name__ == '__main__':
     main()
 
-    
-    
-    
-    
-    

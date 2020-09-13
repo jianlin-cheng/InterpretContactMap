@@ -27,7 +27,6 @@ numpy 1.19.2
 pandas 1.1.2
 tensorflow-gpu 1.9.0
 keras 2.1.6
-h5py 2.8.0
 ```
 
 ## Feature geraration
@@ -40,16 +39,16 @@ The sequence databases used in the DeepMSA homologous sequences search include U
 
 Predict from given PLM and PSSM data (predict.py):
   * `-h, --help`            show this help message and exit
-  * `-m, --model_type`      Type of model, can be one of sequence_attention, regional_attention or combined
+  * `-m, --model_type`      Type of model, can be one of sequence, regional or combined
   * `-l, --plm_data`        Path to PLM data. Should be a numpy array flatten from (441,L,L), where L is the length of the input sequence. It should be saved as .npy format (https://numpy.org/doc/stable/reference/generated/numpy.save.html).
   * `-s, --pssm_data`       Path to PSSM data. Should be a text file start with " # PSSM" as the first line, and the following contents should be 20 lines each contains L values.
   * `-o, --out_file`        Path to output contact map. An L by L numeric matrix saved as TSV format.
-
+  * `-w, --weights`         Should attention weights be extracted.
 
 Example:
 
 ```
-python predict.py -m sequence_attention -l example/plm/T0970.plm -s example/other/X-T0970.txt -o outmap.tsv
+python predict.py -m sequence -l example/plm/T0970.plm -s example/other/X-T0970.txt -o ./outmap.tsv
 ```
                         
                         
@@ -63,7 +62,7 @@ Train models for protein contact prediction with given PLM, PSSM and labels for 
   * `-l, --label_path`           Path to label data files. Should be text files with 0/1 indicate the contacts.
   * `-s, --sample_list_file`     Config file indicating the sample names for training and validation.
 
-  * `-m, --model_type`           Type of model, can be one of "sequence_attention", "regional_attention".
+  * `-m, --model_type`           Type of model, can be one of "sequence", "regional".
   * `-o, --output_dir`           Path where the trained models and history are saved.
   * `-pa, --patience`            Stop the training early for no improvements in validation after x epochs, default is 5.
   * `-e, --epochs`               Number of epochs, default is 60.
@@ -71,5 +70,5 @@ Train models for protein contact prediction with given PLM, PSSM and labels for 
 Example:
 
 ```
-python train.py -m sequence_attention -plm example/plm/ -pssm example/other/ -l example/bin_class/ -s example/train_sample_list.txt -o ./
+python train.py -m sequence -plm example/plm/ -pssm example/other/ -l example/bin_class/ -s example/train_sample_list.txt -o ./
 ```

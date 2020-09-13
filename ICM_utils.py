@@ -4,9 +4,12 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
+from keras.optimizers import Adam
+from keras import backend as K
 from keras.utils import CustomObjectScope, Sequence
 from model_utils import InstanceNormalization,ContactTransformerV5, ContactTransformerV7
-from keras.optimizers import Adam
+from model_utils import extract_sequence_weights, extract_regional_weights
+
 
 
 def load_model_from_config(model_config,model_func):
@@ -25,7 +28,7 @@ def load_model_from_config(model_config,model_func):
     kmax = int(model_parameters.iloc[12][0])
     att_outdim = int(model_parameters.iloc[13][0])
     insert_pos = model_parameters.iloc[14][0]
-    
+    K.clear_session()
     opt = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0000)#0.001  decay=0.0
     model = model_func(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
                                nb_layers,opt,initializer,loss_function,weight_p,weight_n,att_config, \
@@ -55,19 +58,17 @@ def load_features1D(feature_data,name):
     return inputs_feature
 
 def init_model(model_type):
-    if model_type == 'sequence_attention':
+    if model_type == 'sequence':
         model_func = ContactTransformerV5
         model_dir = 'models/sequence_attention/'
-    elif model_type == 'regional_attention':
+    elif model_type == 'regional':
         model_func = ContactTransformerV7
         model_dir = 'models/regional_attention/'   
     with CustomObjectScope({'InstanceNormalization': InstanceNormalization, 'tf':tf}):
         model = load_model_from_config(model_dir+'model_config.txt',model_func)
     return model,model_dir
 
-def predict_cmap(model_type,input_data):
-    model,model_dir = init_model(model_type)
-    model.load_weights(model_dir+'model_weights.h5')
+def predict_cmap(model,input_data,weights=False):
     pred_out = model.predict(input_data, batch_size= 1)
     L = pred_out.shape[1]
     CMAP = pred_out.reshape((L, L))
@@ -112,4 +113,11 @@ class data_generator(Sequence):
         L = inputs_plm.shape[1]
         Y = np.loadtxt(glob.glob(self.label_path+'*'+current_sample+'*.txt')[0]).reshape((1,L,L,1))
         return X, Y
-    
+
+def extract_attention_score(model,X,model_type):
+    if model_type == 'sequence':
+        return extract_sequence_weights(X,model)
+    elif model_type == 'regional':
+        return extract_regional_weights(X, model)
+    else:
+        raise ValueError()
