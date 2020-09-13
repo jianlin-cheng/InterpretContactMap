@@ -41,14 +41,15 @@ def main():
         output_map, score = predict_cmap(input_data,model_type,weights)
         if weights:
             np.save(save_path+'/'+model_type+'_weights.npy',score)
-    else:
+    elif model_type == 'combine':
         s_map, score_s = predict_cmap(input_data,'sequence',weights)
         r_map, score_r = predict_cmap(input_data,'regional',weights)
         if weights:
             np.save(save_path+'/sequence_weights.npy',score_s)
             np.save(save_path+'/regional_weights.npy',score_r)
-            
-        output_map = (s_map + r_map)/2        
+        output_map = (s_map + r_map)/2  
+    else:
+        raise ValueError('Model type should be one of \"sequence\", \"regional\" or \"combine\"')
     np.savetxt(out_file, output_map, fmt='%.4f')
 
 

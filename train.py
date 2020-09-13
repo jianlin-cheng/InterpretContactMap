@@ -18,7 +18,6 @@ def make_argument_parser():
                         help='Type of model, can be \"sequence\" or \"regional\"')
     parser.add_argument('--output_dir', '-o', type=str, required=True,
                         help='Path where the trained models and history are saved')
-
     parser.add_argument('--patience', '-pa', type=int, required=False,
                         help='Stop the training early for no improvements in validation after x epochs.',default=5)
     parser.add_argument('--epochs', '-e', type=int, required=False,
@@ -47,15 +46,21 @@ def main():
     datagen_train = data_generator(plm_data_path,pssm_data_path,label_path,sample_list_train)
     datagen_val = data_generator(plm_data_path,pssm_data_path,label_path,sample_list_val)
     
-    checkpointer1 = ModelCheckpoint(filepath=output_model,verbose=1, save_best_only=False, monitor='val_acc',save_weights_only=True)
-    checkpointer2 = ModelCheckpoint(filepath=output_model_best,verbose=1, save_best_only=True, monitor='val_acc',save_weights_only=True)
+    checkpointer1 = ModelCheckpoint(filepath=output_model,verbose=1,
+                                    save_best_only=False, monitor='val_acc',
+                                    save_weights_only=True)
+    checkpointer2 = ModelCheckpoint(filepath=output_model_best,verbose=1, 
+                                    save_best_only=True, monitor='val_acc',
+                                    save_weights_only=True)
     earlystopper = EarlyStopping(monitor='val_acc', patience=patience, verbose=1)
     csv_logger = CSVLogger(output_history,append=True)
 
-    model,_ = init_model(model_type)
-    
+    if model_type in ['sequence','regional']:
+        model,_ = init_model(model_type)
+    else:
+        raise ValueError('Model type should be \"sequence\" or \"regional\"')
     model.fit_generator(datagen_train,epochs=epochs,validation_data=datagen_val,verbose=1,
                         callbacks=[checkpointer1,checkpointer2, earlystopper, csv_logger])
+    
 if __name__ == '__main__':
     main()
-
