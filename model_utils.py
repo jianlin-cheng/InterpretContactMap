@@ -8,7 +8,7 @@ from keras.layers import Lambda, Input, Layer, Dropout, Activation, Add, add
 from keras.layers import Dense, TimeDistributed, Conv1D, Conv2D, Conv3D
 from keras.layers import Concatenate, BatchNormalization, ZeroPadding1D
 from keras.layers import Softmax, Multiply, Permute
-from keras.layers import GlobalAveragePooling2D, Reshape, CuDNNGRU, Bidirectional
+from keras.layers import GlobalAveragePooling2D, Reshape, CuDNNGRU, Bidirectional,GRU
 
 def _handle_dim_ordering():
     global ROW_AXIS
@@ -586,7 +586,12 @@ def ContactTransformerV5(kernel_size=3,feature_2D_num=(441,56),use_bias=True,hid
     x1d = Lambda(lambda x: x[:,0,:,1::2])(x1d)
     
     x1d = Conv1D(filters,3,activation='relu',padding='same')(x1d)
-    x1d = Bidirectional(CuDNNGRU(filters//4,return_sequences = True))(x1d)
+    
+    if tf.test.is_gpu_available(cuda_only=True):
+        x1d = Bidirectional(CuDNNGRU(filters//4,return_sequences = True))(x1d)
+    else:
+        x1d = Bidirectional(GRU(filters//4,return_sequences = True,
+                                recurrent_activation='sigmoid',reset_after=True))(x1d)
     x1d = MultiHeadAttention(4,filters,0.1)(x1d,x1d,x1d)
     
     x1d = Tile1Dto2D(x1d)

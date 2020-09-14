@@ -14,20 +14,19 @@ Checkout the [Lab Page](http://calla.rnet.missouri.edu/cheng/).
 
 [CCMpred](https://github.com/soedinglab/CCMpred) (For generating pseudo-likelihood maximization)
 
-[Python 3.6.5](https://www.python.org/)
+[Python 3.6](https://www.python.org/)
 
-CUDA-9.0.176
-
-cuDNN-7.1.4
 
 ## Required Python modules:
 
 ```
-numpy 1.19.2
+numpy 1.18.1
 pandas 1.1.2
-tensorflow-gpu 1.9.0
+tensorflow-gpu(Recommended if a CUDA-compatibale GPU is available) /tensorflow 1.15.2 
 keras 2.1.6
 ```
+
+We also provided the Dockerfile to help users setup the required environment when [Docker](https://www.docker.com/get-started) is available on the host system. Please refer to the Docker Tutorials (https://www.docker.com/101-tutorial) for how to build your own image under different systems.
 
 ## Feature geraration
 Two types of features are required: PSSM sequence profile which can be generated from PSI-BLAST, and PLM (pseudo-likelihood maximization) which can be generated from CCMpred from multiple sequence alignments (MSAs) produced by DeepMSA. The details of how to acquire both features are described in the [DeepDist paper](https://www.biorxiv.org/content/10.1101/2020.03.17.995910v1), which is also developed by the BDM lab. 
