@@ -47,7 +47,7 @@ Predict from given PLM and PSSM data (predict.py):
 Example:
 
 ```
-python predict.py -m sequence -l example/plm/T0970.plm -s example/other/X-T0970.txt -o ./outmap.tsv
+python predict.py -m sequence -l example/plm/T0970.plm -s example/other/T0970.pssm.npy -o ./outmap.tsv
 ```
                         
                         
@@ -69,5 +69,5 @@ Train models for protein contact prediction with given PLM, PSSM and labels for 
 Example:
 
 ```
-python train.py -m sequence -plm example/plm/ -pssm example/other/ -l example/bin_class/ -s example/train_sample_list.txt -o ./
+python train.py -m sequence -plm example/plm/ -pssm example/other/ -l example/label/ -s example/train_sample_list.txt -o ./
 ```
