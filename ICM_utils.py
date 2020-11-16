@@ -1,5 +1,4 @@
 import math
-import glob
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -44,17 +43,21 @@ def load_plm(plm_data):
     return inputs_plm
 
 # Load 1D features and tile them to 2D: (L,n)->(L,L,2n)
-def load_features1D(feature_data,name):
+def load_features1D(feature_data,name,dim=20):
     f = open(feature_data, "r")
     all_other_data = f.readlines()
     f.close() 
     feature_idx = all_other_data.index('# '+name+'\n')
-    plm_rawdata = [line.strip().split() for line in all_other_data[(feature_idx+1):(feature_idx+21)]]
-    L = len(plm_rawdata[0])
-    inputs_feature = np.zeros((1,L,L,40))
-    for i in range(20):
+    d = [line.strip().split() for line in all_other_data[(feature_idx+1):(feature_idx+dim+1)]]
+    return np.array(d)
+
+def tile_2d(d):
+    L = d.shape[1]
+    dim = d.shape[0]
+    inputs_feature = np.zeros((1,L,L,dim*2))
+    for i in range(dim):
         for j in range(L):
-            inputs_feature[:,:,j,2*i] = inputs_feature[:,j,:,2*i+1] = [float(x) for x in plm_rawdata[i]]
+            inputs_feature[:,:,j,2*i] = inputs_feature[:,j,:,2*i+1] = [float(x) for x in d[i]]
     return inputs_feature
 
 def init_model(model_type):
@@ -114,10 +117,9 @@ class data_generator(Sequence):
     def __data_generation(self,index):
         current_sample = self.sample_list[self.indexes[index]]
         inputs_plm = load_plm(self.plm_data_path+current_sample+'.plm')
-        inputs_pssm = load_features1D(self.pssm_data_path+'X-'+current_sample+'.txt','PSSM')
+        inputs_pssm = tile_2d(np.load(self.pssm_data_path+current_sample+'.pssm.npy'))
         X = [inputs_plm,inputs_pssm]
-        L = inputs_plm.shape[1]
-        Y = np.loadtxt(glob.glob(self.label_path+'*'+current_sample+'*.txt')[0]).reshape((1,L,L,1))
+        Y = np.load(self.label_path+current_sample+'.npy')
         return X, Y
 
 def extract_attention_score(model,X,model_type):

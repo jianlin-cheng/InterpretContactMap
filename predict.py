@@ -2,7 +2,7 @@ import os
 import argparse
 import numpy as np
 
-from ICM_utils import load_plm, load_features1D, predict_cmap
+from ICM_utils import load_plm, tile_2d, predict_cmap
 
 def make_argument_parser():
 
@@ -33,7 +33,7 @@ def main():
     weights = args.weights
     
     inputs_plm = load_plm(plm_data) # load plm
-    inputs_pssm = load_features1D(pssm_data,'PSSM') # load pssm
+    inputs_pssm = tile_2d(np.load(pssm_data)) # load pssm
     input_data = [inputs_plm,inputs_pssm]
     save_path = os.path.dirname(out_file)
 
