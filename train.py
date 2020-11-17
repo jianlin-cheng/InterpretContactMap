@@ -12,8 +12,10 @@ def make_argument_parser():
                         help='Path to PSSM data files')
     parser.add_argument('--label_path', '-l', type=str, required=True,
                         help='Path to label data files. Should be text files with 0/1 indicate the contacts.')
-    parser.add_argument('--sample_list_file', '-s', type=str, 
-                        required=True,help='Config file indicating the sample names for training and validation')
+    parser.add_argument('--sample_train_file', '-s', type=str, 
+                        required=True,help='Config file indicating the sample names for training')
+    parser.add_argument('--sample_validation_file', '-v', type=str, 
+                        required=True,help='Config file indicating the sample names for validation')
     parser.add_argument('--model_type', '-m', type=str, required=True,
                         help='Type of model, can be \"sequence\" or \"regional\"')
     parser.add_argument('--output_dir', '-o', type=str, required=True,
@@ -32,7 +34,8 @@ def main():
     plm_data_path = args.plm_data_path
     pssm_data_path = args.pssm_data_path
     label_path = args.label_path
-    sample_list_file = args.sample_list_file
+    sample_train_file = args.sample_train_file
+    sample_validation_file = args.sample_validation_file
     output_dir = args.output_dir
     model_type = args.model_type
     patience = args.patience
@@ -45,7 +48,9 @@ def main():
     output_model = output_dir + '/epoch{epoch:02d}.val_acc{val_acc:03f}.h5'
     output_history = output_dir + '/histroy.csv'
 
-    sample_list_train, sample_list_val = load_sample_config(sample_list_file)
+    sample_list_train = [line.rstrip() for line in open(sample_train_file)]
+    sample_list_val = [line.rstrip() for line in open(sample_validation_file)]
+
     datagen_train = data_generator(plm_data_path,pssm_data_path,label_path,sample_list_train)
     datagen_val = data_generator(plm_data_path,pssm_data_path,label_path,sample_list_val)
     
