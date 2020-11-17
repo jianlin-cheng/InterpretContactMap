@@ -69,5 +69,5 @@ Train models for protein contact prediction with given PLM, PSSM and labels for 
 Example:
 
 ```
-python train.py -m sequence -plm example/plm/ -pssm example/other/ -l example/label/ -s example/train_sample_list.txt -o ./
+python train.py -m sequence -plm example/plm/ -pssm example/other/ -l example/label/ -s example/train_sample_list.txt -v example/val_sample_list.txt -o ./
 ```
