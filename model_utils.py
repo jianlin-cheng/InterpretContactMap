@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+import keras
 from keras import backend as K
 from keras.models import Model
 from keras.initializers import random_normal, Constant
@@ -8,20 +9,30 @@ from keras.layers import Lambda, Input, Layer, Dropout, Activation, Add, add
 from keras.layers import Dense, TimeDistributed, Conv1D, Conv2D, Conv3D
 from keras.layers import Concatenate, BatchNormalization, ZeroPadding1D
 from keras.layers import Softmax, Multiply, Permute
-from keras.layers import GlobalAveragePooling2D, Reshape, CuDNNGRU, Bidirectional,GRU
+from keras.layers import GlobalAveragePooling2D, Reshape, Bidirectional,GRU
 
 def _handle_dim_ordering():
     global ROW_AXIS
     global COL_AXIS
     global CHANNEL_AXIS
-    if K.image_dim_ordering() == 'tf':
-        ROW_AXIS = 1
-        COL_AXIS = 2
-        CHANNEL_AXIS = 3
+    if int(tf.__version__.split('.')[0])<2:
+        if K.image_dim_ordering() == 'tf':
+            ROW_AXIS = 1
+            COL_AXIS = 2
+            CHANNEL_AXIS = 3
+        else:
+            CHANNEL_AXIS = 1
+            ROW_AXIS = 2
+            COL_AXIS = 3
     else:
-        CHANNEL_AXIS = 1
-        ROW_AXIS = 2
-        COL_AXIS = 3
+        if K.image_data_format() == 'channels_last':
+            ROW_AXIS = 1
+            COL_AXIS = 2
+            CHANNEL_AXIS = 3
+        else:
+            CHANNEL_AXIS = 1
+            ROW_AXIS = 2
+            COL_AXIS = 3        
 
 def _block_name_base_K(stage, block):
     """Get the convolution name base and batch normalization name base defined by
@@ -190,9 +201,15 @@ class InstanceNormalization(Layer):
         self.built = True
 
     def call(self, inputs, training=None):
-        mean, var = tf.nn.moments(inputs, axes=[1,2], keep_dims=True)
-        return K.batch_normalization(inputs, mean, var, self.beta, self.gamma,
-                                     self.epsilon)
+        if int(tf.__version__.split('.')[0])<2:
+            mean, var = tf.nn.moments(inputs, axes=[1,2], keep_dims=True)
+            out_layer = K.batch_normalization(inputs, mean, var, self.beta, 
+                                              self.gamma, self.epsilon)
+        else:
+            mean, var = tf.nn.moments(inputs, axes=[0,1,2], keepdims=True)
+            out_layer = K.batch_normalization(inputs, mean, var, self.beta, 
+                                              self.gamma,-1,self.epsilon)
+        return out_layer
         
     def compute_output_shape(self, input_shape):
         return input_shape
@@ -587,8 +604,8 @@ def ContactTransformerV5(kernel_size=3,feature_2D_num=(441,56),use_bias=True,hid
     
     x1d = Conv1D(filters,3,activation='relu',padding='same')(x1d)
     
-    if tf.test.is_gpu_available(cuda_only=True):
-        x1d = Bidirectional(CuDNNGRU(filters//4,return_sequences = True))(x1d)
+    if tf.test.is_gpu_available(cuda_only=True) and int(tf.__version__.split('.')[0])<2:
+        x1d = Bidirectional(keras.layers.CuDNNGRU(filters//4,return_sequences = True))(x1d)
     else:
         x1d = Bidirectional(GRU(filters//4,return_sequences = True,
                                 recurrent_activation='sigmoid',reset_after=True))(x1d)
@@ -696,7 +713,11 @@ def ContactTransformerV7(kernel_size=3,feature_2D_num=(441,56),use_bias=True,hid
                              dilation_rate=(1,1))(DNCON4_2D_conv)    
     DNCON4_2D_conv = InstanceNormalization()(DNCON4_2D_conv)
     DNCON4_2D_conv = Activation("relu")(DNCON4_2D_conv)
-    DNCON4_2D_att = MultiHeadAttention2D(region_size,d_model=DNCON4_2D_conv.shape[3].value)([DNCON4_2D_conv,DNCON4_2D_conv,DNCON4_2D_conv])
+    if int(tf.__version__.split('.')[0])<2:
+        dm = DNCON4_2D_conv.shape[3].value
+    else:
+        dm = DNCON4_2D_conv.shape[3]
+    DNCON4_2D_att = MultiHeadAttention2D(region_size,d_model=dm)([DNCON4_2D_conv,DNCON4_2D_conv,DNCON4_2D_conv])
     DNCON4_2D_conv = Add()([DNCON4_2D_conv,DNCON4_2D_att])
     final_out = Conv2D(filters=1, kernel_size=(1, 1), strides=(1,1),use_bias=True,
                              kernel_initializer='he_normal', padding="same",

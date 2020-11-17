@@ -10,7 +10,6 @@ from model_utils import InstanceNormalization,ContactTransformerV5, ContactTrans
 from model_utils import extract_sequence_weights, extract_regional_weights
 
 
-
 def load_model_from_config(model_config,model_func):
     model_parameters = pd.read_csv(model_config,header =0, index_col =0)
     win_array = int(model_parameters.iloc[0][0])

@@ -1,4 +1,5 @@
 import os
+import tensorflow as tf
 import argparse
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger
 from ICM_utils import data_generator, init_model
@@ -45,7 +46,11 @@ def main():
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     output_model_best = output_dir + '/best_model.h5'
-    output_model = output_dir + '/epoch{epoch:02d}.val_acc{val_acc:03f}.h5'
+    if int(tf.__version__.split('.')[0])<2:
+        val_str = 'val_acc'
+    else:
+        val_str = 'val_accuracy'
+    output_model = output_dir + '/epoch{epoch:02d}.'+val_str+'{'+val_str+':03f}.h5'
     output_history = output_dir + '/histroy.csv'
 
     sample_list_train = [line.rstrip() for line in open(sample_train_file)]
@@ -55,12 +60,12 @@ def main():
     datagen_val = data_generator(plm_data_path,pssm_data_path,label_path,sample_list_val)
     
     checkpointer1 = ModelCheckpoint(filepath=output_model,verbose=1,
-                                    save_best_only=False, monitor='val_acc',
+                                    save_best_only=False, monitor=val_str,
                                     save_weights_only=True)
     checkpointer2 = ModelCheckpoint(filepath=output_model_best,verbose=1, 
-                                    save_best_only=True, monitor='val_acc',
+                                    save_best_only=True, monitor=val_str,
                                     save_weights_only=True)
-    earlystopper = EarlyStopping(monitor='val_acc', patience=patience, verbose=1)
+    earlystopper = EarlyStopping(monitor=val_str, patience=patience, verbose=1)
     csv_logger = CSVLogger(output_history,append=True)
 
     if model_type in ['sequence','regional']:
