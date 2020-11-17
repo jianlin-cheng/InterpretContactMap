@@ -1,7 +1,7 @@
 import os
 import argparse
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger
-from ICM_utils import data_generator, load_sample_config, init_model
+from ICM_utils import data_generator, init_model
 
 def make_argument_parser():
     parser = argparse.ArgumentParser(description="Train a model.",formatter_class=argparse.RawTextHelpFormatter)
