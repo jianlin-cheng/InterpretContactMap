@@ -26,11 +26,13 @@ def load_model_from_config(model_config,model_func):
     kmax = int(model_parameters.iloc[12][0])
     att_outdim = int(model_parameters.iloc[13][0])
     insert_pos = model_parameters.iloc[14][0]
+    n_head = int(model_parameters.iloc[15][0])
+    att_dim = int(model_parameters.iloc[16][0])
     K.clear_session()
     opt = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0000)#0.001  decay=0.0
     model = model_func(win_array,feature_2D_num,use_bias,hidden_type,nb_filters,\
                                nb_layers,opt,initializer,loss_function,weight_p,weight_n,att_config, \
-                               kmax,att_outdim,insert_pos)
+                               kmax,att_outdim,insert_pos,n_head=n_head,att_dim=att_dim)
     return model
 
 
@@ -65,7 +67,7 @@ def init_model(model_type):
         model_dir = 'models/sequence_attention/'
     elif model_type == 'regional':
         model_func = ContactTransformerV7
-        model_dir = 'models/regional_attention/'   
+        model_dir = 'models/regional_attention/'    
     with CustomObjectScope({'InstanceNormalization': InstanceNormalization, 'tf':tf}):
         model = load_model_from_config(model_dir+'model_config.txt',model_func)
     return model,model_dir

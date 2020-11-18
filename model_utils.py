@@ -594,7 +594,7 @@ def bottleneck_1d(filters, stage=0, block=0, kernel_size=3,
 def ContactTransformerV5(kernel_size=3,feature_2D_num=(441,56),use_bias=True,hidden_type='sigmoid', \
                        filters = 64,nb_layers = 34,opt = 'Adam', initializer = "he_normal", \
                        loss_function = "binary_crossentropy", weight_p=1.0,weight_n=1.0, \
-                       region_size = 3,config_1d = 1,att_outdim=0,insert_pos = 'none',L=None):
+                       region_size = 3,config_1d = 1,att_outdim=0,insert_pos = 'none',L=None,n_head=4,att_dim=64):
     
     input2d = Input(shape=(None,None,feature_2D_num[0]), name='input2d')
     input1d = Input(shape=(None,None,feature_2D_num[1]), name='input1d')
@@ -609,7 +609,7 @@ def ContactTransformerV5(kernel_size=3,feature_2D_num=(441,56),use_bias=True,hid
     else:
         x1d = Bidirectional(GRU(filters//4,return_sequences = True,
                                 recurrent_activation='sigmoid',reset_after=True))(x1d)
-    x1d = MultiHeadAttention(4,filters,0.1)(x1d,x1d,x1d)
+    x1d = MultiHeadAttention(n_head,att_dim,0.1)(x1d,x1d,x1d)
     
     x1d = Tile1Dto2D(x1d)
     
@@ -673,7 +673,7 @@ def ContactTransformerV5(kernel_size=3,feature_2D_num=(441,56),use_bias=True,hid
 def ContactTransformerV7(kernel_size=3,feature_2D_num=(441,56),use_bias=True,hidden_type='sigmoid', \
                        filters = 64,nb_layers = 34,opt = 'Adam', initializer = "he_normal", \
                        loss_function = "binary_crossentropy", weight_p=1.0,weight_n=1.0, \
-                       region_size = 3,config_1d = 1,att_outdim=0,insert_pos = 'none'):
+                       region_size = 3,config_1d = 1,att_outdim=64,insert_pos = 'none',n_head=4,att_dim=32):
     
     input2d = Input(shape=(None,None,feature_2D_num[0]), name='input2d')
     input1d = Input(shape=(None,None,feature_2D_num[1]), name='input1d')
@@ -708,7 +708,7 @@ def ContactTransformerV7(kernel_size=3,feature_2D_num=(441,56),use_bias=True,hid
     DNCON4_2D_conv = block
     DNCON4_2D_conv = InstanceNormalization()(DNCON4_2D_conv)
     DNCON4_2D_conv = Activation("relu")(DNCON4_2D_conv)
-    DNCON4_2D_conv = Conv2D(filters=32, kernel_size=(3, 3), strides=(1,1),use_bias=True,
+    DNCON4_2D_conv = Conv2D(filters=att_dim, kernel_size=(3, 3), strides=(1,1),use_bias=True,
                              kernel_initializer='he_normal', padding="same",
                              dilation_rate=(1,1))(DNCON4_2D_conv)    
     DNCON4_2D_conv = InstanceNormalization()(DNCON4_2D_conv)
@@ -717,7 +717,7 @@ def ContactTransformerV7(kernel_size=3,feature_2D_num=(441,56),use_bias=True,hid
         dm = DNCON4_2D_conv.shape[3].value
     else:
         dm = DNCON4_2D_conv.shape[3]
-    DNCON4_2D_att = MultiHeadAttention2D(region_size,d_model=dm)([DNCON4_2D_conv,DNCON4_2D_conv,DNCON4_2D_conv])
+    DNCON4_2D_att = MultiHeadAttention2D(region_size,d_model=dm,n_head=n_head)([DNCON4_2D_conv,DNCON4_2D_conv,DNCON4_2D_conv])
     DNCON4_2D_conv = Add()([DNCON4_2D_conv,DNCON4_2D_att])
     final_out = Conv2D(filters=1, kernel_size=(1, 1), strides=(1,1),use_bias=True,
                              kernel_initializer='he_normal', padding="same",
