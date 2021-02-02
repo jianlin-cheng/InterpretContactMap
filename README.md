@@ -3,7 +3,7 @@ Deep learning methods for interpreting protein contact maps
 
 Contribute
 ---------------------
-DeepGRN has been developed and used by the Bioinformatics, Data Mining and Machine Learning Laboratory (BDM)
+This work has been developed and used by the Bioinformatics, Data Mining and Machine Learning Laboratory (BDM)
 . Help from every community member is very valuable to make the tool better for everyone.
 Checkout the [Lab Page](http://calla.rnet.missouri.edu/cheng/).
 
